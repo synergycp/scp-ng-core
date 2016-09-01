@@ -30,6 +30,7 @@
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",
     "lodash": "^4.15.0",
+    "ngstorage": "^0.3.11",
     "restangular": "^1.5.2"
   }
 }

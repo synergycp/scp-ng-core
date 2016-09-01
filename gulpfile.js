@@ -18,11 +18,14 @@ var source = {
     paths.scripts + '**/*.module.js',
     paths.scripts + '**/*.js'
   ],
+  templates: paths.scripts + '**/*.pug',
 };
 
 var build = {
   dir: './build',
-  src: 'src.min.js',
+  src: {
+    js: 'src.min.js',
+  },
   vendor: {
     js: 'vendor.min.js',
     css: 'vendor.min.css',
@@ -37,13 +40,14 @@ var vendor = {
 };
 
 var cssnanoOpts = {};
+var pugOptions = {};
 
 gulp.task('scripts', function () {
   return gulp
     .src(source.scripts)
     .pipe($.jsvalidate())
     .on('error', handleError)
-    .pipe($.concat(build.src))
+    .pipe($.concat(build.src.js))
     .pipe($.ngAnnotate())
     .on('error', handleError)
     .pipe($.uglify({
@@ -85,7 +89,7 @@ gulp.task('merge', function () {
   return gulp
     .src([
       build.dir +'/'+build.vendor.js,
-      build.dir +'/'+build.src,
+      build.dir +'/'+build.src.js,
     ])
     .pipe($.concat(build.dist.js))
     .pipe(gulp.dest('./'))

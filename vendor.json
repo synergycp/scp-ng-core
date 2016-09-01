@@ -1,4 +1,5 @@
 [
+  "node_modules/ngstorage/ngStorage.js",
   "node_modules/restangular/dist/restangular.min.js",
   "node_modules/lodash/lodash.min.js"
 ]
