@@ -25,6 +25,7 @@ var build = {
   dir: './build',
   src: {
     js: 'src.min.js',
+    tpls: 'templates.js',
   },
   vendor: {
     js: 'vendor.min.js',
@@ -40,7 +41,13 @@ var vendor = {
 };
 
 var cssnanoOpts = {};
-var pugOptions = {};
+var pugOptions = {
+  basedir: './',
+};
+var tplCacheOptions = {
+  root: 'scp/core',
+  module: 'scp.core',
+};
 
 gulp.task('scripts', function () {
   return gulp
@@ -85,11 +92,25 @@ gulp.task('vendor', function () {
     ;
 });
 
+gulp.task('templates', function () {
+  return gulp
+    .src(source.templates)
+    .pipe($.pug(pugOptions))
+    .on('error', handleError)
+    .pipe($.angularTemplatecache(tplCacheOptions))
+    .pipe($.if(isProduction, $.uglify({
+      preserveComments: 'some'
+    })))
+    .pipe(gulp.dest(build.dir))
+    ;
+});
+
 gulp.task('merge', function () {
   return gulp
     .src([
       build.dir +'/'+build.vendor.js,
       build.dir +'/'+build.src.js,
+      build.dir +'/'+build.src.tpls,
     ])
     .pipe($.concat(build.dist.js))
     .pipe(gulp.dest('./'))
@@ -99,6 +120,7 @@ gulp.task('merge', function () {
 gulp.task('default', gulpsync.sync([
   'scripts',
   'vendor',
+  'templates',
   'merge',
 ]));
 
