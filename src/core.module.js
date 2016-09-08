@@ -3,11 +3,10 @@
 
   angular
     .module('scp.core', [
-      'ngStorage',
-
       'scp.core.api',
       'scp.core.auth',
       'scp.core.mixins',
+      'scp.core.search',
       'scp.core.util',
     ]);
 })();

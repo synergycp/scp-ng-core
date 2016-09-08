@@ -7,11 +7,13 @@
     ;
 
   function makeAuthProvider() {
-    var loginType;
+    var loginType, uniqueField;
     var AuthProvider = {
       $get: makeAuthService,
       setLoginType: setLoginType,
       getLoginType: getLoginType,
+      setUniqueField: setUniqueField,
+      getUniqueField: getUniqueField,
     };
 
     return AuthProvider;
@@ -24,6 +26,16 @@
 
     function getLoginType() {
       return loginType;
+    }
+
+    function setUniqueField(type) {
+      uniqueField = type;
+
+      return AuthProvider;
+    }
+
+    function getUniqueField() {
+      return uniqueField;
     }
 
     /**
@@ -52,6 +64,7 @@
       Auth.getLoginType = getLoginTypeOrFail;
       Auth.whileLoggedIn = whileLoggedIn;
       Auth.isLoggedIn = isLoggedIn;
+      Auth.getUniqueField = getUniqueFieldOrFail;
 
       EventEmitter.bindTo(Auth);
 
@@ -140,6 +153,16 @@
         }
 
         return type;
+      }
+
+      function getUniqueFieldOrFail() {
+        var value = AuthProvider.getUniqueField();
+
+        if (!value) {
+          throw new Error('Unique field not configured on AuthProvider');
+        }
+
+        return value;
       }
     }
   }
