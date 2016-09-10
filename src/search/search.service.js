@@ -11,13 +11,9 @@
    *
    * @ngInject
    */
-  function SearchService (EventEmitter, $state, $stateParams, $q, $rootScope) {
+  function SearchService (EventEmitter, $state, $stateParams, $q) {
     var Search = this;
     var event = EventEmitter();
-
-    $rootScope.$on('$stateChangeStart', function (event, toState, toParams) {
-      Search.query = toParams.q;
-    });
 
     Search.go = go;
     Search.tab = {
@@ -27,11 +23,8 @@
     };
 
     event.bindTo(Search);
-    event.on('change', function () {
-      $state.go('app.search', {
-        q: Search.query,
-      });
-    });
+    event.on('change', syncQuery);
+    event.on('tab.add', syncTab);
 
     //////////
 
@@ -43,18 +36,28 @@
       event.fire('change', Search.query);
     }
 
+    function syncQuery() {
+      _.map(Search.tab.items, syncTab);
+    }
+
     function addTab(tab) {
       Search.tab.items.push(tab);
 
       event.fire('tab.add', tab);
     }
 
+    function syncTab(tab) {
+      tab.list.filter({
+        q: Search.query,
+      });
+    }
+
     function loadAllTabs() {
-      return $q.all(_.map(Search.tab.items, function (tab) {
-        return tab.list.filter({
-          q: Search.query,
-        }).load();
-      }));
+      return $q.all(
+        _.map(Search.tab.items, function (tab) {
+          return tab.list.load();
+        })
+      );
     }
   }
 })();
