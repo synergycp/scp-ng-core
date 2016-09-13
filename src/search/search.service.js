@@ -34,6 +34,8 @@
       }
 
       event.fire('change', Search.query);
+
+      return Search;
     }
 
     function syncQuery() {
