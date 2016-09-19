@@ -43,7 +43,11 @@
     }
 
     function addTab(tab) {
-      Search.tab.items.push(tab);
+      Search.tab.items.splice(
+        _.sortedIndexBy(Search.tab.items, tab, 'order'),
+        0,
+        tab
+      );
 
       event.fire('tab.add', tab);
     }
