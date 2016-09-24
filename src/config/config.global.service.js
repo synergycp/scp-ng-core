@@ -13,7 +13,7 @@
   function GlobalConfigService (Api, $q, _) {
     var GlobalConfig = this;
     var $groups = Api.all('setting-group');
-    var groups, slugMap;
+    var groups, slugMap, groupsPromise;
 
     GlobalConfig.bySlug = bySlug;
     GlobalConfig.get = get;
@@ -61,18 +61,20 @@
     }
 
     function getList() {
-      if (groups) {
-        return $q.when(groups);
+      if (groupsPromise) {
+        return groupsPromise;
       }
 
       return getFresh();
     }
 
     function getFresh() {
-      return $groups
+      groupsPromise = $groups
         .getList()
         .then(storeGroups)
         ;
+
+      return groupsPromise;
     }
 
     function storeGroups(response) {
