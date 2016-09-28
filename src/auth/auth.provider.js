@@ -65,6 +65,7 @@
       Auth.whileLoggedIn = whileLoggedIn;
       Auth.isLoggedIn = isLoggedIn;
       Auth.getUniqueField = getUniqueFieldOrFail;
+      Auth.setApiKey = setApiKey;
 
       EventEmitter.bindTo(Auth);
 
@@ -136,6 +137,15 @@
 
         return $keys
           .post(data)
+          .then(handleResponse.bind(null, remember))
+          .then(fireLogin)
+          ;
+      }
+
+      function setApiKey(key, remember) {
+        return $keys
+          .one('current')
+          .get({ key: key })
           .then(handleResponse.bind(null, remember))
           .then(fireLogin)
           ;
