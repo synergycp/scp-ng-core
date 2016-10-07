@@ -22,8 +22,8 @@
     /**
      * @ngInject
      */
-    function makeService() {
-      return new SsoUrlService(SsoUrlProvider);
+    function makeService($state) {
+      return new SsoUrlService(SsoUrlProvider, $state);
     }
 
     function map(type, callback) {
@@ -39,10 +39,8 @@
 
   /**
    * SsoUrl Service
-   *
-   * @ngInject
    */
-  function SsoUrlService (SsoUrlProvider) {
+  function SsoUrlService (SsoUrlProvider, $state, PackageLoader) {
     var SsoUrl = this;
 
     SsoUrl.get = get;
@@ -50,7 +48,10 @@
     //////////
 
     function get(options) {
-      return getByCallback(options);
+      return PackageLoader
+        .load()
+        .then(getByCallback.bind(null, options))
+        ;
     }
 
     function getByCallback(options) {
@@ -61,11 +62,20 @@
       var callback = SsoUrlProvider.get(options.type);
 
       if (!callback) {
-        console.warn('No SSO URL for ' + options.type + '. Please use SsoUrlProvider.map("'+options.type+'", callback).');
+        console.warn(
+          'No SSO URL for ' + options.type + '. '+
+          'Please use SsoUrlProvider.map("'+options.type+'", callback).'
+        );
         return;
       }
 
-      return callback(options);
+      var result = callback($state, options);
+
+      if (result && result.charAt(0) === '#') {
+        result = result.substring(1);
+      }
+
+      return result;
     }
   }
 })();
