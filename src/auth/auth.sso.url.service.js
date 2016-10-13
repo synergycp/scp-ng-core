@@ -14,6 +14,8 @@
       $get: makeService,
       map: map,
       get: get,
+      resolve: resolve,
+      resolves: [],
     };
     var mapping = {};
 
@@ -22,8 +24,14 @@
     /**
      * @ngInject
      */
-    function makeService($state) {
-      return new SsoUrlService(SsoUrlProvider, $state);
+    function makeService($state, $injector, $q) {
+      return new SsoUrlService(SsoUrlProvider, $state, $injector, $q);
+    }
+
+    function resolve(injectable) {
+      SsoUrlProvider.resolves.push(injectable);
+
+      return SsoUrlProvider;
     }
 
     function map(type, callback) {
@@ -40,18 +48,35 @@
   /**
    * SsoUrl Service
    */
-  function SsoUrlService (SsoUrlProvider, $state, PackageLoader) {
+  function SsoUrlService (SsoUrlProvider, $state, $injector, $q) {
     var SsoUrl = this;
+    var resolveAllPromise;
 
     SsoUrl.get = get;
 
     //////////
 
     function get(options) {
-      return PackageLoader
-        .load()
+      return promiseToResolveAll()
         .then(getByCallback.bind(null, options))
         ;
+    }
+
+    function promiseToResolveAll() {
+      return (resolveAllPromise =
+        resolveAllPromise ||
+          makePromiseToResolveAll()
+      );
+    }
+
+    function makePromiseToResolveAll() {
+      return $q.all(
+        _.map(SsoUrlProvider.resolves, promiseToResolve)
+      );
+    }
+
+    function promiseToResolve(resolve) {
+      return $injector.invoke(resolve);
     }
 
     function getByCallback(options) {
