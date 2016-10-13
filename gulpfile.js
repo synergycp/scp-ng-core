@@ -18,11 +18,15 @@ var source = {
     paths.scripts + '**/*.module.js',
     paths.scripts + '**/*.js'
   ],
+  templates: paths.scripts + '**/*.pug',
 };
 
 var build = {
   dir: './build',
-  src: 'src.min.js',
+  src: {
+    js: 'src.min.js',
+    tpls: 'templates.js',
+  },
   vendor: {
     js: 'vendor.min.js',
     css: 'vendor.min.css',
@@ -37,13 +41,20 @@ var vendor = {
 };
 
 var cssnanoOpts = {};
+var pugOptions = {
+  basedir: './',
+};
+var tplCacheOptions = {
+  root: 'scp/core',
+  module: 'scp.core',
+};
 
 gulp.task('scripts', function () {
   return gulp
     .src(source.scripts)
     .pipe($.jsvalidate())
     .on('error', handleError)
-    .pipe($.concat(build.src))
+    .pipe($.concat(build.src.js))
     .pipe($.ngAnnotate())
     .on('error', handleError)
     .pipe($.uglify({
@@ -81,11 +92,25 @@ gulp.task('vendor', function () {
     ;
 });
 
+gulp.task('templates', function () {
+  return gulp
+    .src(source.templates)
+    .pipe($.pug(pugOptions))
+    .on('error', handleError)
+    .pipe($.angularTemplatecache(tplCacheOptions))
+    .pipe($.if(isProduction, $.uglify({
+      preserveComments: 'some'
+    })))
+    .pipe(gulp.dest(build.dir))
+    ;
+});
+
 gulp.task('merge', function () {
   return gulp
     .src([
       build.dir +'/'+build.vendor.js,
-      build.dir +'/'+build.src,
+      build.dir +'/'+build.src.js,
+      build.dir +'/'+build.src.tpls,
     ])
     .pipe($.concat(build.dist.js))
     .pipe(gulp.dest('./'))
@@ -95,6 +120,7 @@ gulp.task('merge', function () {
 gulp.task('default', gulpsync.sync([
   'scripts',
   'vendor',
+  'templates',
   'merge',
 ]));
 

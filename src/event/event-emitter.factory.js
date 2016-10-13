@@ -39,7 +39,7 @@
 
     function fire(name) {
       var args = [].splice.call(arguments, 1);
-      _.each(event.callbacks[name], function (cb) {
+      _.each(event.callbacks[name] || [], function (cb) {
         cb.apply(cb, args);
       });
     }
