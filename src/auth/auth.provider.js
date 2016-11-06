@@ -61,6 +61,7 @@
       Auth.logout = logout;
       Auth.login = login;
       Auth.user = user;
+      Auth.verify = verify;
       Auth.getLoginType = getLoginTypeOrFail;
       Auth.whileLoggedIn = whileLoggedIn;
       Auth.isLoggedIn = isLoggedIn;
@@ -75,6 +76,26 @@
 
       function isLoggedIn() {
         return !!ApiKey.id();
+      }
+      
+      function verify(code, verify) {
+        return code
+          .patch({
+            verify: verify,
+          })
+          .then(getVerifiedApiKey)
+          .then(storeApiKey.bind(null, true)) // TODO: remember
+          .then(Auth.fire.bind(Auth, 'verify.complete'))
+        ;
+      }
+
+      function getVerifiedApiKey(response) {
+        return response.key;
+      }
+
+      function storeApiKey(remember, key) {
+        ApiKey.set(key, remember);
+        fireLogin();
       }
 
       function whileLoggedIn(start, stop) {
@@ -138,7 +159,6 @@
         return $keys
           .post(data)
           .then(handleResponse.bind(null, remember))
-          .then(fireLogin)
           ;
       }
 
@@ -147,12 +167,16 @@
           .one('current')
           .get({ key: key })
           .then(handleResponse.bind(null, remember))
-          .then(fireLogin)
           ;
       }
 
       function handleResponse(remember, response) {
-        ApiKey.set(response, remember);
+        if (response.verify) {
+          Auth.fire('verify.start', response.verify.code);
+          return;
+        }
+
+        storeApiKey(remember, response);
       }
 
       function getLoginTypeOrFail() {

@@ -17,7 +17,16 @@
       makeArray: makeArray,
       overwrite: overwrite,
       return: wrappedReturn,
+      passArg: passArg,
     });
+
+    function passArg(callback) {
+      return function (arg) {
+        callback();
+
+        return arg;
+      };
+    }
 
     function makeArray(length, value) {
       var arr = [];
