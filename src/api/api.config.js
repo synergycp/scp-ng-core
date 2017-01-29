@@ -13,6 +13,9 @@
     if (location.host.substr(0, 'localhost'.length) == 'localhost') {
       url = 'http://dev.synergycp.net/';
     }
+    if (location.port == 8001 || location.port == 8002) {
+      url = 'http://dev.synergycp.net:8000/';
+    }
     ApiProvider.setUrl(url);
     ApiProvider.addResponseInterceptor(apiResponseTranslator);
 
