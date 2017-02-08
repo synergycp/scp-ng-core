@@ -9,14 +9,14 @@
   /**
    * @ngInject
    */
-  function ServerManageFactory() {
+  function ServerManageFactory(_) {
     var ServerManageProvider = {};
     var service;
 
     ServerManageProvider.panels = {
-      top: new PanelProvider(),
-      left: new PanelProvider(),
-      right: new PanelProvider(),
+      top: new PanelProvider(_),
+      left: new PanelProvider(_),
+      right: new PanelProvider(_),
     };
     ServerManageProvider.$get = makeServerManageService;
 
@@ -92,14 +92,40 @@
     }
   }
 
-  function PanelProvider() {
+  /**
+   * @ngInject
+   */
+  function PanelProvider(_) {
     var panelProvider = this;
 
     panelProvider.items = [];
     panelProvider.add = add;
+    panelProvider.after = after;
 
+    /**
+     * @param {string} name
+     * @param item
+     * @returns {PanelProvider}
+     */
+    function after(name, item) {
+      var index = _.findIndex(panelProvider.items, {
+        name: name,
+      });
+
+      index = index === -1 ? panelProvider.items.length : index;
+      panelProvider.items.splice(index,  0, item);
+
+      return panelProvider;
+    }
+
+    /**
+     * @param item
+     * @returns {PanelProvider}
+     */
     function add(item) {
       panelProvider.items.push(item);
+
+      return panelProvider;
     }
   }
 }());
