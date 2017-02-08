@@ -9,6 +9,7 @@
       'scp.core.dashboard',
       'scp.core.mixins',
       'scp.core.search',
+      'scp.core.server',
       'scp.core.util',
     ]);
 })();
