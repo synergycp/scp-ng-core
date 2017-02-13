@@ -46,12 +46,21 @@
       ServerManage.init = init;
       ServerManage.getServer = getServer;
       ServerManage.getControllerScope = getControllerScope;
+      ServerManage.reset = reset;
 
       function init(_server, _$scope) {
+        ServerManage.reset();
+
         panelContext.server = server = _server;
         $scope = _$scope;
 
         return renderPanels();
+      }
+
+      function reset() {
+        ServerManage.renderedPanels.top.length = 0;
+        ServerManage.renderedPanels.left.length = 0;
+        ServerManage.renderedPanels.right.length = 0;
       }
 
       function getServer() {
@@ -82,7 +91,8 @@
           return $injector.get(panel);
         }
 
-        panel.context = panel.context || {};
+        panel = _.clone(panel);
+        panel.context = _.clone(panel.context || {});
         _.defaults(panel.context, panelContext);
 
         return panel;
