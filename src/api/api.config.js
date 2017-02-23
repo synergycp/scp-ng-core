@@ -33,7 +33,7 @@
       }
 
       extractedData.response = data;
-      extractedData.data = function () {
+      extractedData.getOriginalData = function () {
         return data.data;
       };
       return extractedData;
