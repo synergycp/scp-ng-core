@@ -2,18 +2,28 @@
   'use strict';
 
   angular
-    .module('scp.core.event')
-    .factory('EventEmitter', EventEmitterFactory);
+    .module('scp.core.util')
+    .provider('EventEmitter', makeEventEmitterProvider)
+  ;
 
-  /**
-   * EventEmitter Factory
-   *
-   * @ngInject
-   */
-  function EventEmitterFactory (_) {
-    return function () {
-        return new EventEmitter(_);
-    };
+  function makeEventEmitterProvider(_) {
+    var EventEmitterProvider = {};
+
+    EventEmitterProvider.make = makeEventEmitter;
+    EventEmitterProvider.$get = makeEventEmitterFactory;
+
+    return EventEmitterProvider;
+
+    /**
+     * @ngInject
+     */
+    function makeEventEmitterFactory() {
+      return makeEventEmitter;
+    }
+
+    function makeEventEmitter() {
+      return new EventEmitter(_);
+    }
   }
 
   function EventEmitter (_) {

@@ -122,7 +122,7 @@
         name: name,
       });
 
-      index = index === -1 ? panelProvider.items.length : index;
+      index = index === -1 ? panelProvider.items.length : index + 1;
       panelProvider.items.splice(index,  0, item);
 
       return panelProvider;
