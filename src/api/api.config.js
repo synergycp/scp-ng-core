@@ -22,16 +22,20 @@
     ///////////
 
     function apiResponseTranslator(data, operation, what, url, response, deferred) {
-      var extractedData = data.data || {};
+      // TODO: Get rid of this entire translator, reference response.data everywhere.
+      var extractedData = _.clone(data.data || {});
       extractedData.messages = data.messages;
 
-      if (operation === "getList") {
+      if (operation === "getList" && extractedData.data) {
         var meta = extractedData;
         extractedData = extractedData.data;
         extractedData.meta = meta;
       }
 
       extractedData.response = data;
+      extractedData.data = function () {
+        return data.data;
+      };
       return extractedData;
     }
   }
