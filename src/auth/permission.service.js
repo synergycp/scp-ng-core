@@ -77,7 +77,7 @@
         .then(function (response) {
           cachedId = ownerId;
           getMapPromise = undefined;
-          return cachedMap = response.data();
+          return cachedMap = response.getOriginalData();
         })
       ;
     }
