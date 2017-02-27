@@ -2,6 +2,6 @@
   'use strict';
 
   angular
-    .module('scp.core.event', [
+    .module('scp.core.server', [
     ]);
 })();

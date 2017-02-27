@@ -4,7 +4,7 @@
   angular
     .module('scp.core.auth')
     .provider('ApiKey', makeApiKeyProvider)
-    ;
+  ;
 
   /**
    * Injector Interface
@@ -15,20 +15,23 @@
     /**
      * @return {Object|void} the stored API Key
      */
-    this.get = function () {};
+    this.get = function () {
+    };
 
     /**
      * @param {Object} apiKey
      */
-    this.set = function (apiKey) {};
+    this.set = function (apiKey) {
+    };
 
     /**
      * Remove the key from storage.
      */
-    this.remove = function () {};
+    this.remove = function () {
+    };
   }
 
-  function makeApiKeyProvider($injector) {
+  function makeApiKeyProvider() {
     var storageEngine, storageKey;
     var ApiKeyProvider = {
       $get: ApiKeyService,
@@ -43,7 +46,7 @@
     /**
      * @param {string} engine An injectable constant that resolves an Injector.
      *
-     * @return this
+     * @return {object}
      */
     function setStorageKey(key) {
       storageKey = key;
@@ -54,7 +57,7 @@
     /**
      * @param {string} engine An injectable constant that resolves an Injector.
      *
-     * @return this
+     * @return {string}
      */
     function getStorageKey() {
       if (!storageKey) {
@@ -67,7 +70,7 @@
     /**
      * @param {string} engine An injectable constant that resolves an Injector.
      *
-     * @return this
+     * @return {object}
      */
     function setStorageEngine(engine) {
       storageEngine = engine;
@@ -87,7 +90,7 @@
      *
      * @ngInject
      */
-    function ApiKeyService($injector) {
+    function ApiKeyService($injector, $q) {
       var ApiKey = this;
       var engine;
       var apiKey = getApiKeyFromStorage();
@@ -112,21 +115,27 @@
         return apiKey ? apiKey.id : null;
       }
 
+      /**
+       * @param {string} key
+       * @param {bool} remember
+       *
+       * @return {Promise}
+       */
       function setApiKey(key, remember) {
-        getStorage().set(apiKey = {
+        apiKey = {
           id: key.id,
           key: key.key,
-          owner: {
-            id: key.owner.id,
-            name: key.owner.name,
-          },
-        });
+          owner: key.owner,
+        };
 
-        return ApiKey;
+        getStorage().set(apiKey);
+
+        return $q.when(apiKey);
       }
 
       function getApiKeyFromStorage() {
-        return getStorage().get() || null;
+        return getStorage()
+            .get() || null;
       }
 
       /**
@@ -135,7 +144,8 @@
       function deleteApiKey() {
         apiKey = null;
 
-        getStorage().remove();
+        getStorage()
+          .remove();
 
         return ApiKey;
       }

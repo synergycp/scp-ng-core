@@ -9,12 +9,15 @@
   /**
    * @ngInject
    */
-  function makeDashboardProvider() {
+  function makeDashboardProvider(EventEmitterProvider) {
     var DashboardProvider = {};
     var repos = [];
 
     DashboardProvider.$get = makeDashboardService;
     DashboardProvider.add = add;
+    DashboardProvider.remove = remove;
+    DashboardProvider.repos = repos;
+    EventEmitterProvider.make().bindTo(DashboardProvider);
 
     return DashboardProvider;
 
@@ -27,6 +30,17 @@
 
     function add(name) {
       repos.push(name);
+      DashboardProvider.fire('repo:add', name);
+
+      return DashboardProvider;
+    }
+
+    function remove(name) {
+      var index = repos.indexOf(name);
+      if (index !== -1) {
+        repos.splice(index, 1);
+        DashboardProvider.fire('repo:remove', name);
+      }
 
       return DashboardProvider;
     }
@@ -38,11 +52,22 @@
       var Dashboard = this;
 
       Dashboard.get = get;
+      Dashboard.add = DashboardProvider.add;
+      Dashboard.remove = DashboardProvider.remove;
+      Dashboard.provider = DashboardProvider;
 
       //////////
 
       function get() {
-        return _.map(repos, $injector.get);
+        var result = [];
+
+        for (var i in repos) {
+          result.push(
+            $injector.get(repos[i])
+          );
+        }
+
+        return result;
       }
     }
   }

@@ -1,6 +1,6 @@
 {
   "name": "scp-ng-core",
-  "version": "0.0.4",
+  "version": "0.0.12",
   "description": "Synergy Control Panel Angular Core files",
   "main": "dist.min.js",
   "scripts": {
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://github.com/cabloo/scp-ng-core.git"
+    "url": "git+ssh://github.com/synergycp/scp-ng-core.git"
   },
   "author": "Synergy Control Panel",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/cabloo/scp-ng-core/issues"
+    "url": "https://github.com/synergycp/scp-ng-core/issues"
   },
-  "homepage": "https://github.com/cabloo/scp-ng-core#readme",
+  "homepage": "https://github.com/synergycp/scp-ng-core#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-angular-templatecache": "^2.0.0",

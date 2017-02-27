@@ -3,7 +3,8 @@
 
   angular
     .module('scp.core.api')
-    .provider('Api', ApiProviderFactory);
+    .provider('Api', ApiProviderFactory)
+  ;
 
   /**
    * @ngInject
@@ -41,11 +42,12 @@
      * 	 - Handle API Error Responses
      * @ngInject
      */
-    function ApiService(ApiKey, Restangular, $state, Alert, $injector) {
-      var proxy = wrapRestangular(Restangular);
-      proxy.baseUrl = baseUrl;
-      proxy.apiUrl = apiUrl;
-      proxy.wrap = wrapRestangular;
+    function ApiService(ApiKey, Restangular, Alert, $injector, _) {
+      var Api = wrapRestangular(Restangular);
+      Api.baseUrl = baseUrl;
+      Api.apiUrl = apiUrl;
+      Api.wrap = wrapRestangular;
+      Api.showMessagesFrom = showMessagesFrom;
 
       function wrapRestangular(result) {
         if (!result || result.isWrapped) {
@@ -112,7 +114,7 @@
 
       activate();
 
-      return proxy;
+      return Api;
 
       function activate() {
         Restangular.addErrorInterceptor(apiErrorInterceptor);
@@ -137,8 +139,12 @@
       }
 
       function apiErrorTranslator(response, deferred, responseHandler) {
+        Api.showMessagesFrom(response);
+      }
+
+      function showMessagesFrom(response) {
         if (response.data) {
-          return angular.forEach(response.data.messages, displayMessage);
+          return _.each(response.data.messages, displayMessage);
         }
 
         displayMessage({
@@ -148,7 +154,7 @@
       }
 
       function displayMessages(response) {
-        angular.forEach(response.messages, displayMessage);
+        _.each(response.messages, displayMessage);
 
         return response;
       }

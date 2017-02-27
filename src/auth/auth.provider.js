@@ -94,15 +94,20 @@
       }
 
       function storeApiKey(remember, key) {
-        ApiKey.set(key, remember);
-        fireLogin();
+        ApiKey
+          .set(key, remember)
+          .then(fireLogin)
+        ;
       }
 
       function whileLoggedIn(start, stop) {
-        Auth.on('login', start);
-        Auth.on('logout', stop);
-
-        if (Auth.isLoggedIn()) {
+        if (start) {
+          Auth.on('login', start);
+        }
+        if (stop) {
+          Auth.on('logout', stop);
+        }
+        if (start && Auth.isLoggedIn()) {
           start();
         }
       }
