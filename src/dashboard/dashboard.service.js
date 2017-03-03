@@ -55,19 +55,22 @@
       Dashboard.add = DashboardProvider.add;
       Dashboard.remove = DashboardProvider.remove;
       Dashboard.provider = DashboardProvider;
+      Dashboard.provider.getRepo = getRepo;
 
       //////////
 
       function get() {
         var result = [];
-
         for (var i in repos) {
           result.push(
-            $injector.get(repos[i])
+            getRepo(repos[i])
           );
         }
-
         return result;
+      }
+
+      function getRepo(name) {
+        return $injector.get(name);
       }
     }
   }
