@@ -79,9 +79,18 @@
 
       function reRenderPanels() {
         _.each(ServerManageProvider.panels, function (panelProvider, key) {
+          var renderedPanels = [];
+          _.map(panelProvider.items, function (item) {
+            var rendered = renderPanel(item);
+            _.isArray(rendered) ? 
+              _.map(rendered, function(item) {
+                renderedPanels.push(renderPanel(item));
+              }) : 
+              renderedPanels.push(rendered);
+          })
           _.setContents(
             ServerManage.renderedPanels[key],
-            _.map(panelProvider.items, renderPanel)
+            renderedPanels
           );
         });
       }
