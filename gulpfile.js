@@ -81,7 +81,6 @@ gulp.task('vendor', function () {
     .pipe($.expectFile(vendor.source))
     .pipe(jsFilter)
     .pipe($.concat(build.vendor.js))
-    .pipe($.if(isProduction, $.uglify()))
     .pipe(gulp.dest(build.dir))
     .pipe(jsFilter.restore())
     .pipe(cssFilter)
