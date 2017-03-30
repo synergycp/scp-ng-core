@@ -9,7 +9,7 @@
    * @ngInject
    */
   function ApiConfigRestangular(ApiProvider) {
-    var url = '/';
+    var url = location.protocol + '//' + location.host + '/';
     if (location.host.substr(0, 'localhost'.length) == 'localhost') {
       url = 'http://dev.synergycp.net/';
     }
