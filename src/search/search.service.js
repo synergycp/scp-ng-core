@@ -20,6 +20,7 @@
       items: [],
       add: addTab,
       loadAll: loadAllTabs,
+      remove: removeTab,
     };
 
     event.bindTo(Search);
@@ -50,6 +51,12 @@
       );
 
       event.fire('tab.add', tab);
+    }
+
+    function removeTab(tab) {
+      _.remove(Search.tab.items, tab);
+
+      event.fire('tab.remove', tab);
     }
 
     function syncTab(tab) {
