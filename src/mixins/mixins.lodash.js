@@ -55,7 +55,7 @@
       }
 
       _.forEach(original, function (value, key) {
-        original[key] = contents[key] || value;
+        original[key] = typeof contents[key] === 'undefined' ? value : contents[key];
       });
 
       return original;
