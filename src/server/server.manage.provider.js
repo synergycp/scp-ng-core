@@ -97,7 +97,8 @@
 
       function renderPanel(panel) {
         if (typeof panel === "string") {
-          return $injector.get(panel);
+          var injectedPanel = $injector.get(panel);
+          return typeof injectedPanel == 'function' ? injectedPanel() : injectedPanel;
         }
 
         panel = _.clone(panel);
