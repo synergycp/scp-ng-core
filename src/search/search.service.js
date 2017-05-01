@@ -68,7 +68,7 @@
     function loadAllTabs() {
       return $q.all(
         _.map(Search.tab.items, function (tab) {
-          return tab.list.load();
+          return tab.list.load().then(null, function() {});
         })
       );
     }
