@@ -14,10 +14,16 @@
     var date = this;
 
     date.round = round;
+    date.parse = parse;
     date.formatDateTime = 'YYYY-MM-DD HH:mm';
     date.formatServer = date.formatDateTime;
+    date.formatDate = 'YYYY-MM-DD';
 
     //////////
+
+    function parse(str) {
+      return moment(str);
+    }
 
     function round(date, duration, type) {
       var func = ({
