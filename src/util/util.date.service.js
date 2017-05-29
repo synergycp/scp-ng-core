@@ -3,7 +3,9 @@
 
   angular
     .module('scp.core.util')
-    .service('date', DateService);
+    .service('date', DateService)
+    .service('Date', DateService)
+  ;
 
   /**
    * Date Service
