@@ -9,13 +9,16 @@
    * @ngInject
    */
   function ApiConfigRestangular(ApiProvider) {
-    var url = location.protocol + '//' + location.host + '/';
-    if (location.host.substr(0, 'localhost'.length) == 'localhost') {
-      url = 'http://dev.synergycp.net/';
+    var host = location.host;
+
+    if (startsWith(host,  'admin.')) {
+      host = host.substr('admin.'.length);
     }
-    if (location.port == 8001 || location.port == 8002) {
-      url = 'http://dev.synergycp.net:8000/';
+    var url = location.protocol + '//api.' + host + '/';
+    if (startsWith(host, 'localhost') || startsWith(host,  'dev.synergycp.net')) {
+      url = 'http://api.dev.synergycp.net/';
     }
+
     ApiProvider.setUrl(url);
     ApiProvider.addResponseInterceptor(apiResponseTranslator);
 
@@ -37,6 +40,10 @@
         return data.data;
       };
       return extractedData;
+    }
+
+    function startsWith(haystack, needle) {
+      return haystack.substr(0, needle.length) === needle;
     }
   }
 }());
