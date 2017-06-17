@@ -28,7 +28,7 @@
     function setUrl(url) {
       ApiProvider.options.url = url;
 
-      RestangularProvider.setBaseUrl(url+'/api');
+      RestangularProvider.setBaseUrl(url);
     }
 
     function baseUrl() {
