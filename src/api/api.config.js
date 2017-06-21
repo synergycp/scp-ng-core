@@ -9,17 +9,6 @@
    * @ngInject
    */
   function ApiConfigRestangular(ApiProvider) {
-    var host = location.host;
-
-    if (startsWith(host,  'admin.')) {
-      host = host.substr('admin.'.length);
-    }
-    var url = location.protocol + '//api.' + host + '/';
-    if (startsWith(host, 'localhost') || startsWith(host,  'dev.synergycp.net')) {
-      url = 'http://api.dev.synergycp.net/';
-    }
-
-    ApiProvider.setUrl(url);
     ApiProvider.addResponseInterceptor(apiResponseTranslator);
 
     ///////////
@@ -40,10 +29,6 @@
         return data.data;
       };
       return extractedData;
-    }
-
-    function startsWith(haystack, needle) {
-      return haystack.substr(0, needle.length) === needle;
     }
   }
 }());
