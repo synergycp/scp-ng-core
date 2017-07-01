@@ -60,6 +60,7 @@
 
       Auth.logout = logout;
       Auth.login = login;
+      Auth.loginByApiKey = loginByApiKey;
       Auth.user = user;
       Auth.verify = verify;
       Auth.getLoginType = getLoginTypeOrFail;
@@ -165,6 +166,10 @@
           .post(data)
           .then(handleResponse.bind(null, remember))
           ;
+      }
+
+      function loginByApiKey() {
+        setApiKey(ApiKey.get(), true); // TODO: remember
       }
 
       function setApiKey(key, remember) {
