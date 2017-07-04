@@ -53,6 +53,7 @@ gulp.task('scripts', function () {
   return gulp
     .src(source.scripts)
     .pipe($.jsvalidate())
+    .pipe($.sourcemaps.init({loadMaps: true}))
     .on('error', handleError)
     .pipe($.concat(build.src.js))
     .pipe($.ngAnnotate())
@@ -61,6 +62,7 @@ gulp.task('scripts', function () {
       preserveComments: 'some'
     }))
     .on('error', handleError)
+    .pipe($.sourcemaps.write('./'))
     .pipe(gulp.dest(build.dir))
     ;
 });
@@ -80,12 +82,14 @@ gulp.task('vendor', function () {
     .src(vendor.source)
     .pipe($.expectFile(vendor.source))
     .pipe(jsFilter)
+    .pipe($.sourcemaps.init({loadMaps: true}))
     .pipe($.concat(build.vendor.js))
     .pipe(gulp.dest(build.dir))
     .pipe(jsFilter.restore())
     .pipe(cssFilter)
     .pipe($.concat(build.vendor.css))
     .pipe($.cssnano(cssnanoOpts))
+    .pipe($.sourcemaps.write('./'))
     .pipe(gulp.dest(build.dir))
     .pipe(cssFilter.restore())
     ;
@@ -111,7 +115,9 @@ gulp.task('merge', function () {
       build.dir +'/'+build.src.js,
       build.dir +'/'+build.src.tpls,
     ])
+    .pipe($.sourcemaps.init({loadMaps: true}))
     .pipe($.concat(build.dist.js))
+    .pipe($.sourcemaps.write('./'))
     .pipe(gulp.dest('./'))
     ;
 });
