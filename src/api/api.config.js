@@ -13,7 +13,7 @@
 
     ///////////
 
-    function apiResponseTranslator(data, operation, what, url, response, deferred) {
+    function apiResponseTranslator(data, operation, what, url, response1, deferred) {
       // TODO: Get rid of this entire translator, reference response.data everywhere.
       var extractedData = _.clone(data.data || {});
       extractedData.messages = data.messages;
