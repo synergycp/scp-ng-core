@@ -116,7 +116,7 @@
       function user() {
         return Api
           .all(Auth.getLoginType())
-          .one(''+ApiKey.owner().id)
+          .one((''+ApiKey.owner() || {}).id)
           ;
       }
 
