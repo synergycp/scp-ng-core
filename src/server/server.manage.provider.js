@@ -9,14 +9,15 @@
   /**
    * @ngInject
    */
-  function ServerManageFactory(_) {
+  function ServerManageFactory(_, EventEmitter) {
     var ServerManageProvider = {};
     var service;
+    var event = EventEmitter();
 
     ServerManageProvider.panels = {
-      top: new PanelProvider(_),
-      left: new PanelProvider(_),
-      right: new PanelProvider(_),
+      top: new PanelProvider(_, event),
+      left: new PanelProvider(_, event),
+      right: new PanelProvider(_, event),
     };
     ServerManageProvider.$get = makeServerManageService;
 
@@ -47,6 +48,8 @@
       ServerManage.getServer = getServer;
       ServerManage.getControllerScope = getControllerScope;
       ServerManage.reset = reset;
+
+      event.on('add', reRenderPanels);
 
       function init(_server, _$scope) {
         ServerManage.reset();
@@ -112,10 +115,7 @@
     }
   }
 
-  /**
-   * @ngInject
-   */
-  function PanelProvider(_) {
+  function PanelProvider(_, event) {
     var panelProvider = this;
 
     panelProvider.items = [];
@@ -134,6 +134,7 @@
 
       index = index === -1 ? panelProvider.items.length : index + 1;
       panelProvider.items.splice(index,  0, item);
+      event.fire('add', item);
 
       return panelProvider;
     }
@@ -144,6 +145,7 @@
      */
     function add(item) {
       panelProvider.items.push(item);
+      event.fire('add', item);
 
       return panelProvider;
     }
