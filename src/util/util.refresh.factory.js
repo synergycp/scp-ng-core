@@ -28,7 +28,9 @@
     //////////
 
     function now() {
-      callback();
+      callback({
+        auto: false,
+      });
 
       return refresh;
     }
@@ -39,7 +41,11 @@
       }
 
       if (ms) {
-        interval = $interval(callback, ms);
+        interval = $interval(function() {
+          callback({
+            auto: true,
+          });
+        }, ms);
       }
 
       return refresh;
