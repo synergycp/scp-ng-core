@@ -3,5 +3,6 @@
 
   angular
     .module('scp.core.server', [
+      'scp.core.util',
     ]);
 })();
