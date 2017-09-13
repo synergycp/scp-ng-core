@@ -3,16 +3,16 @@
 
   angular
     .module('scp.core.server')
-    .provider('ServerManage', ServerManageFactory)
+    .provider('ServerManage', ServerManageProvider)
   ;
 
   /**
    * @ngInject
    */
-  function ServerManageFactory(_, EventEmitter) {
+  function ServerManageProvider(_, EventEmitterProvider) {
     var ServerManageProvider = {};
     var service;
-    var event = EventEmitter();
+    var event = EventEmitterProvider.make();
 
     ServerManageProvider.panels = {
       top: new PanelProvider(_, event),
