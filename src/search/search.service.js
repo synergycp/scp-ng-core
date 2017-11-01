@@ -14,7 +14,6 @@
   function SearchService (EventEmitter, $state, $stateParams, $q) {
     var Search = this;
     var event = EventEmitter();
-    var waitAll = $q.defer();
 
     Search.go = go;
     Search.tab = {
@@ -31,7 +30,11 @@
     //////////
 
     function waitForAllToLoad() {
-      return waitAll.promise;
+      return $q.all(_.map(Search.tab.items, function (tab) {
+        return tab.list.load({
+          showLoader: true,
+        });
+      }));
     }
 
     function go(search) {
@@ -56,14 +59,6 @@
       );
 
       event.fire('tab.add', tab);
-
-      tab.on('load', checkAllLoaded);
-    }
-
-    function checkAllLoaded() {
-      return _.every(Search.tab.items, function (tab) {
-        return !tab.loader.loading;
-      });
     }
 
     function removeTab(tab) {
