@@ -14,13 +14,14 @@
   function SearchService (EventEmitter, $state, $stateParams, $q) {
     var Search = this;
     var event = EventEmitter();
+    var waitAll = $q.defer();
 
     Search.go = go;
     Search.tab = {
       items: [],
       add: addTab,
-      loadAll: loadAllTabs,
       remove: removeTab,
+      waitForAllToLoad: waitForAllToLoad,
     };
 
     event.bindTo(Search);
@@ -28,6 +29,10 @@
     event.on('tab.add', syncTab);
 
     //////////
+
+    function waitForAllToLoad() {
+      return waitAll.promise;
+    }
 
     function go(search) {
       if (typeof search !== 'undefined') {
@@ -51,6 +56,14 @@
       );
 
       event.fire('tab.add', tab);
+
+      tab.on('load', checkAllLoaded);
+    }
+
+    function checkAllLoaded() {
+      return _.every(Search.tab.items, function (tab) {
+        return !tab.loader.loading;
+      });
     }
 
     function removeTab(tab) {
@@ -63,14 +76,6 @@
       tab.list.filter({
         q: Search.query,
       });
-    }
-
-    function loadAllTabs() {
-      return $q.all(
-        _.map(Search.tab.items, function (tab) {
-          return tab.list.load().then(null, function() {});
-        })
-      );
     }
   }
 })();
