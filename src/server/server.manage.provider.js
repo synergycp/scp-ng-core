@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  var DEBUG = false;
+
   angular
     .module('scp.core.server')
     .provider('ServerManage', ServerManageProvider)
@@ -37,19 +39,21 @@
       var ServerManage = this;
       var server, $scope;
       var panelContext = {};
+      // Queueing the re-render resolves some race conditions with package loading.
+      var queueReRenderPanels = _.debounce(reRenderPanels, 1);
 
       ServerManage.renderedPanels = {
         top: [],
         left: [],
         right: [],
       };
-
       ServerManage.init = init;
       ServerManage.getServer = getServer;
+
       ServerManage.getControllerScope = getControllerScope;
       ServerManage.reset = reset;
 
-      event.on('add', reRenderPanels);
+      event.on('add', queueReRenderPanels);
 
       function init(_server, _$scope) {
         ServerManage.reset();
@@ -81,21 +85,33 @@
       }
 
       function reRenderPanels() {
+        // If the scope hasn't been set yet, we aren't ready to render the panels yet.
+        if (!$scope) {
+          return;
+        }
         _.each(ServerManageProvider.panels, function (panelProvider, key) {
           var renderedPanels = [];
           _.map(panelProvider.items, function (item) {
-            var rendered = renderPanel(item);
-            _.isArray(rendered) ? 
-              _.map(rendered, function(item) {
-                renderedPanels.push(renderPanel(item));
-              }) : 
-              renderedPanels.push(rendered);
+            DEBUG && console.log("rendering ", item);
+            try {
+              var rendered = renderPanel(item);
+              _.isArray(rendered) ?
+                _(rendered)
+                  .map(renderPanel)
+                  .map(Array.push.bind(renderedPanels))
+                  .value()
+                : renderedPanels.push(rendered);
+            } catch (e) {
+              console.error('Failed to render panel: ', item, e);
+            }
           })
           _.setContents(
             ServerManage.renderedPanels[key],
             renderedPanels
           );
         });
+
+
       }
 
       function renderPanel(panel) {
