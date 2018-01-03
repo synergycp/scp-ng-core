@@ -98,7 +98,7 @@
               _.isArray(rendered) ?
                 _(rendered)
                   .map(renderPanel)
-                  .map(Array.push.bind(renderedPanels))
+                  .map(Array.prototype.push.bind(renderedPanels))
                   .value()
                 : renderedPanels.push(rendered);
             } catch (e) {
@@ -110,8 +110,6 @@
             renderedPanels
           );
         });
-
-
       }
 
       function renderPanel(panel) {
