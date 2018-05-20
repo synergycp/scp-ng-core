@@ -100,8 +100,24 @@
       ApiKey.id = getApiKeyId;
       ApiKey.delete = deleteApiKey;
       ApiKey.owner = getOwner;
+      ApiKey.waitForOwner = waitForOwner;
 
       return ApiKey;
+
+      function waitForOwner() {
+        var defer = $q.defer();
+
+        setInterval(checkForOwner, 50);
+        checkForOwner();
+
+        return defer.promise;
+
+        function checkForOwner() {
+          if (apiKey) {
+            defer.resolve(getOwner());
+          }
+        }
+      }
 
       function getApiKey() {
         return apiKey ? apiKey.key : null;

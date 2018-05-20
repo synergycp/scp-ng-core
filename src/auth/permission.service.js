@@ -10,7 +10,7 @@
    * @ngInject
    * @constructor
    */
-  function PermissionService(Api, ApiKey, _, $q, $timeout) {
+  function PermissionService(Api, ApiKey, _, $timeout) {
     var Permission = this;
     var cachedId;
     var cachedMap;
@@ -60,26 +60,28 @@
     }
 
     function map() {
-      // TODO: fix race conditions
-      var ownerId = ApiKey.owner().id;
-      if (cachedId && cachedId === ownerId) {
-        return $q.when(cachedMap);
-      }
+      return ApiKey.waitForOwner()
+        .then(function (owner) {
+          var ownerId = owner.id;
+          if (cachedId && cachedId === ownerId) {
+            return cachedMap;
+          }
 
-      if (getMapPromise) {
-        return getMapPromise;
-      }
+          if (getMapPromise) {
+            return getMapPromise;
+          }
 
-      return getMapPromise = Api
-        .oneUrl('owner', ApiKey.owner().url)
-        .one('permission')
-        .get()
-        .then(function (response) {
-          cachedId = ownerId;
-          getMapPromise = undefined;
-          return cachedMap = response.getOriginalData();
-        })
-      ;
+          return getMapPromise = Api
+            .oneUrl('owner', owner.url)
+            .one('permission')
+            .get()
+            .then(function (response) {
+              cachedId = ownerId;
+              getMapPromise = undefined;
+              return cachedMap = response.getOriginalData();
+            })
+            ;
+        });
     }
   }
 })();
