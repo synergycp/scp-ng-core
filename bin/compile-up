@@ -3,8 +3,7 @@
 od=$(pwd)
 gulp
 
-cd ../scp-angle
+cd ../scp-angle 2> /dev/null || cd ../angle
 ./bin/compile-up
 
 cd $od
-
