@@ -34,6 +34,7 @@
     Config.getHomeBandwidthRange = getHomeBandwidthRange;
     Config.getServerBandwidthRange = getServerBandwidthRange;
     Config.getSwitchBandwidthRange = getSwitchBandwidthRange;
+    Config.getSiteName = getSiteName;
 
     //////////
 
@@ -47,6 +48,10 @@
 
     function getSwitchBandwidthRange() {
       return GlobalConfig.get('bandwidth_default');
+    }
+
+    function getSiteName() {
+      return GlobalConfig.get('site_name');
     }
   }
 })();
