@@ -68,6 +68,7 @@
       Auth.isLoggedIn = isLoggedIn;
       Auth.getUniqueField = getUniqueFieldOrFail;
       Auth.setApiKey = setApiKey;
+      Auth.renew = renew;
 
       EventEmitter.bindTo(Auth);
 
@@ -78,6 +79,10 @@
       function isLoggedIn() {
         return !!ApiKey.id();
       }
+
+      function renew() {
+        return $keys.post().then(ApiKey.set);
+      }
       
       function verify(code, verify) {
         return code
@@ -85,7 +90,7 @@
             verify: verify,
           })
           .then(getVerifiedApiKey)
-          .then(storeApiKey.bind(null, true)) // TODO: remember
+          .then(storeApiKey)
           .then(Auth.fire.bind(Auth, 'verify.complete'))
         ;
       }
@@ -94,9 +99,9 @@
         return response.key;
       }
 
-      function storeApiKey(remember, key) {
+      function storeApiKey(key) {
         ApiKey
-          .set(key, remember)
+          .set(key)
           .then(fireLogin)
         ;
       }
@@ -155,38 +160,37 @@
 
       /**
        * @param object credentials
-       * @param boolean remember
        */
-      function login(credentials, remember) {
+      function login(credentials) {
         var data = _.assign({
           type: Auth.getLoginType(),
         }, credentials);
 
         return $keys
           .post(data)
-          .then(handleResponse.bind(null, remember))
+          .then(handleResponse)
           ;
       }
 
       function loginByApiKey() {
-        setApiKey(ApiKey.get(), true); // TODO: remember
+        setApiKey(ApiKey.get());
       }
 
-      function setApiKey(key, remember) {
+      function setApiKey(key) {
         return $keys
           .one('current')
           .get({ key: key })
-          .then(handleResponse.bind(null, remember))
+          .then(handleResponse)
           ;
       }
 
-      function handleResponse(remember, response) {
+      function handleResponse(response) {
         if (response.verify) {
           Auth.fire('verify.start', response.verify.code);
           return;
         }
 
-        storeApiKey(remember, response);
+        storeApiKey(response);
       }
 
       function getLoginTypeOrFail() {
