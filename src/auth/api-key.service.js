@@ -6,35 +6,15 @@
     .provider('ApiKey', makeApiKeyProvider)
   ;
 
+  var SECONDS_BETWEEN_RENEW_AND_EXPIRE = 45;
+
   /**
-   * Injector Interface
-   *
-   * @param {string} key the key to store results as.
+   * @ngInject
    */
-  function Injector(key) {
-    /**
-     * @return {Object|void} the stored API Key
-     */
-    this.get = function () {
-    };
-
-    /**
-     * @param {Object} apiKey
-     */
-    this.set = function (apiKey) {
-    };
-
-    /**
-     * Remove the key from storage.
-     */
-    this.remove = function () {
-    };
-  }
-
   function makeApiKeyProvider() {
     var storageEngine, storageKey;
     var ApiKeyProvider = {
-      $get: ApiKeyService,
+      $get: makeApiKeyService,
       setStorageEngine: setStorageEngine,
       getStorageEngine: getStorageEngine,
       setStorageKey: setStorageKey,
@@ -42,6 +22,13 @@
     };
 
     return ApiKeyProvider;
+
+    /**
+     * @ngInject
+     */
+    function makeApiKeyService($injector) {
+      return $injector.instantiate(ApiKeyService);
+    }
 
     /**
      * @param {string} engine An injectable constant that resolves an Injector.
@@ -90,10 +77,9 @@
      *
      * @ngInject
      */
-    function ApiKeyService($injector, $q) {
+    function ApiKeyService($injector, $q, EventEmitter) {
       var ApiKey = this;
-      var engine;
-      var apiKey = getApiKeyFromStorage();
+      var engine, nearingExpirationTimeout;
 
       ApiKey.get = getApiKey;
       ApiKey.set = setApiKey;
@@ -101,6 +87,21 @@
       ApiKey.delete = deleteApiKey;
       ApiKey.owner = getOwner;
       ApiKey.waitForOwner = waitForOwner;
+      ApiKey.secondsToRenewal = secondsToRenewal;
+
+      EventEmitter().bindTo(ApiKey);
+
+      // This has to come after EventEmitter bindings.
+      var apiKey = getApiKeyFromStorage();
+      try {
+        setNearExpirationTimeout();
+      } catch (e) {
+        if (e instanceof ExpiredKey) {
+          apiKey = null;
+        } else {
+          throw e;
+        }
+      }
 
       return ApiKey;
 
@@ -131,27 +132,57 @@
         return apiKey ? apiKey.id : null;
       }
 
+      function nearingExpiration() {
+        ApiKey.fire('near-expiration', apiKey);
+      }
+
+      function secondsToRenewal() {
+        if (!apiKey || !apiKey.expires_at) {
+          return null;
+        }
+
+        // TODO: get this value from the API in case the user's clock is wrong.
+        var secondsToExpiration = apiKey.expires_at - Math.floor(new Date()/1000);
+        if (secondsToExpiration <= 0) {
+          // The user's key has expired, so return them to the login page.
+          throw new ExpiredKey();
+        }
+
+        return secondsToExpiration - SECONDS_BETWEEN_RENEW_AND_EXPIRE;
+      }
+
       /**
-       * @param {string} key
-       * @param {bool} remember
+       * @param {mixed} key
        *
        * @return {Promise}
        */
-      function setApiKey(key, remember) {
+      function setApiKey(key) {
         apiKey = {
           id: key.id,
           key: key.key,
           owner: key.owner,
+          expires_at: key.expires_at ? key.expires_at.unix : null,
         };
 
         getStorage().set(apiKey);
 
+        setNearExpirationTimeout();
+
         return $q.when(apiKey);
       }
 
+      function setNearExpirationTimeout() {
+        var secondsToRenew = secondsToRenewal();
+        if (secondsToRenew === null) {
+          return;
+        } else {
+          nearingExpirationTimeout && clearTimeout(nearingExpirationTimeout);
+          nearingExpirationTimeout = setTimeout(nearingExpiration, Math.max(secondsToRenew, 0) * 1000);
+        }
+      }
+
       function getApiKeyFromStorage() {
-        return getStorage()
-            .get() || null;
+        return getStorage().get() || null;
       }
 
       /**
@@ -159,6 +190,8 @@
        */
       function deleteApiKey() {
         apiKey = null;
+
+        nearingExpirationTimeout && clearTimeout(nearingExpirationTimeout);
 
         getStorage()
           .remove();
@@ -189,4 +222,6 @@
       }
     }
   }
+
+  function ExpiredKey() {}
 })();
