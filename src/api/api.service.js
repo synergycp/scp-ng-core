@@ -44,6 +44,7 @@
      */
     function ApiService(ApiKey, Restangular, Alert, $injector, _) {
       var Api = wrapRestangular(Restangular);
+      var hasReceivedUnauthedError = false;
       Api.baseUrl = baseUrl;
       Api.apiUrl = apiUrl;
       Api.wrap = wrapRestangular;
@@ -130,7 +131,7 @@
         switch (response.status) {
         case 401:
           sendToLogin();
-          return false;
+          return;
         }
       }
 
@@ -143,6 +144,18 @@
       }
 
       function showMessagesFrom(response) {
+        if (response.status === 401) {
+          // When someone gets an unauthorized response, we don't want them to get a bunch of errors all at once.
+          if (hasReceivedUnauthedError) {
+            return;
+          }
+
+          hasReceivedUnauthedError = true;
+          setTimeout(function () {
+            hasReceivedUnauthedError = false;
+          }, 1000);
+        }
+
         if (response.data) {
           return _.each(response.data.messages, displayMessage);
         }
