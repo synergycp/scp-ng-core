@@ -223,5 +223,7 @@
     }
   }
 
-  function ExpiredKey() {}
+  function ExpiredKey() {
+    this.message = 'This API Key appears to be expired. Maybe the server clock or your computer\'s clock is wrong?';
+  }
 })();
