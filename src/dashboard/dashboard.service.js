@@ -6,15 +6,18 @@
     .provider('Dashboard', makeDashboardProvider)
     ;
 
+  var DEFAULT_PRIORITY = 100;
+
   /**
    * @ngInject
    */
-  function makeDashboardProvider(EventEmitterProvider) {
+  function makeDashboardProvider(_, EventEmitterProvider) {
     var DashboardProvider = {};
     var repos = [];
 
     DashboardProvider.$get = makeDashboardService;
     DashboardProvider.add = add;
+    DashboardProvider.addWithPriority = addWithPriority;
     DashboardProvider.remove = remove;
     DashboardProvider.repos = repos;
     EventEmitterProvider.make().bindTo(DashboardProvider);
@@ -29,18 +32,23 @@
     }
 
     function add(name) {
-      repos.push(name);
+      return addWithPriority(name, DEFAULT_PRIORITY);
+    }
+
+    function addWithPriority(name, priority) {
+      repos.push({
+        name: name,
+        priority: priority,
+      });
+
       DashboardProvider.fire('repo:add', name);
 
       return DashboardProvider;
     }
 
     function remove(name) {
-      var index = repos.indexOf(name);
-      if (index !== -1) {
-        repos.splice(index, 1);
-        DashboardProvider.fire('repo:remove', name);
-      }
+      _.remove(repos, {name: name});
+      DashboardProvider.fire('repo:remove', name);
 
       return DashboardProvider;
     }
@@ -60,17 +68,14 @@
       //////////
 
       function get() {
-        var result = [];
-        for (var i in repos) {
-          result.push(
-            getRepo(repos[i])
-          );
-        }
-        return result;
+        return _(repos)
+          .sortBy(['priority'])
+          .map(getRepo)
+          .value();
       }
 
-      function getRepo(name) {
-        return $injector.get(name);
+      function getRepo(repo) {
+        return $injector.get(repo.name);
       }
     }
   }
