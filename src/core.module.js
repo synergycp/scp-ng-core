@@ -1,3 +1,6 @@
+// To fix broken vendor packages that assume module.exports exists.
+var module = module || {};
+
 (function () {
   'use strict';
 

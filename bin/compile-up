@@ -1,9 +1,9 @@
 #!/bin/bash
 
 od=$(pwd)
-gulp
+gulp || exit 1
 
-cd ../scp-angle 2> /dev/null || cd ../angle
-./bin/compile-up
+cd ../scp-angle 2> /dev/null || cd ../angle || exit 1
+./bin/compile-up || exit 1
 
 cd $od
