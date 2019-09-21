@@ -36,19 +36,21 @@
     }
 
     function addWithPriority(name, priority) {
-      repos.push({
+      var repo = {
         name: name,
         priority: priority,
-      });
+      };
+      repos.push(repo);
 
-      DashboardProvider.fire('repo:add', name);
+      DashboardProvider.fire('repo:add', repo);
 
       return DashboardProvider;
     }
 
     function remove(name) {
-      _.remove(repos, {name: name});
-      DashboardProvider.fire('repo:remove', name);
+      var repo = _.remove(repos, {name: name})[0];
+
+      repo && DashboardProvider.fire('repo:remove', repo);
 
       return DashboardProvider;
     }
