@@ -85,6 +85,9 @@
         }
 
         function wrapNested(response) {
+          // TODO: this setup fixes some weird bug where the URL becomes e.g. PATCH /server/3/3 when you do
+          // `server.patch({})` to one of the entries in the result of `api.getList()`. This has a side effect though:
+          // it makes `server.patch({})` render Alerts twice.
           response.getList = result.getList;
           response.remove = result.remove;
           response.patch = result.patch;
@@ -94,7 +97,7 @@
           response.all = result.all;
           response.one = result.one;
 
-          return wrapRestangular(response);
+          return response;
         }
 
         function wrapList(oldMethod) {
