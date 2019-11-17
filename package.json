@@ -1,6 +1,6 @@
 {
   "name": "scp-ng-core",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Synergy Control Panel Angular Core files",
   "main": "dist.min.js",
   "scripts": {
