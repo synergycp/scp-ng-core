@@ -69,7 +69,10 @@
      * @return {string}
      */
     function getStorageEngine() {
-      return storageEngine;
+      // IMPORTANT: This code is a security mechanism to prevent clickjacking. Essentially, we are disabling storage of
+      // API keys inside iframes, so when someone embeds our app as an iframe, the user's credentials are not loaded.
+      // More about clickjacking: https://owasp.org/www-project-cheat-sheets/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html#Best-for-now_Legacy_Browser_Frame_Breaking_Script
+      return self !== top ? 'ApiKeyNullStorageEngine' : storageEngine;
     }
 
     /**
