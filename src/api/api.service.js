@@ -51,7 +51,7 @@
       Api.showMessagesFrom = showMessagesFrom;
 
       function wrapRestangular(result) {
-        if (!result || result.isWrapped) {
+        if (!result || typeof result !== "object" || result.isWrapped) {
           return result;
         }
 
