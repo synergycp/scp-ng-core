@@ -1,7 +1,6 @@
 var
   gulp = require('gulp'),
   $ = require('gulp-load-plugins')(),
-  gulpsync = $.sync(gulp)
   ;
 
 var isProduction = true;
@@ -122,7 +121,7 @@ gulp.task('merge', function () {
     ;
 });
 
-gulp.task('default', gulpsync.sync([
+gulp.task('default', gulp.series([
   'scripts',
   'vendor',
   'templates',
