@@ -1,18 +1,18 @@
 (function () {
-  'use strict';
+  "use strict";
 
   angular
-    .module('scp.core.config')
-    .service('GlobalConfig', GlobalConfigService);
+    .module("scp.core.config")
+    .service("GlobalConfig", GlobalConfigService);
 
   /**
    * GlobalConfig Service
    *
    * @ngInject
    */
-  function GlobalConfigService (Api, $q, _) {
+  function GlobalConfigService(Api, $q, _, Modal) {
     var GlobalConfig = this;
-    var $groups = Api.all('setting-group');
+    var $groups = Api.all("setting-group");
     var groups, slugMap, groupsPromise;
 
     GlobalConfig.bySlug = bySlug;
@@ -21,11 +21,18 @@
     //////////
 
     function get(slug) {
-      return GlobalConfig
-        .bySlug()
+      return GlobalConfig.bySlug()
         .then(getSetting)
         .then(getValue)
-        ;
+        .catch(function () {
+          var apiDomain = {
+            domainUrl: Api.all("").getRestangularUrl(),
+          };
+          var lang = "auth.error.modal";
+          return Modal.information(lang)
+            .translateValues(apiDomain)
+            .open().result;
+        });
 
       function getSetting() {
         return slugMap[slug];
@@ -33,15 +40,13 @@
     }
 
     function getValue(setting) {
-      return setting.options ?
-        setting.options[setting.value].text :
-        setting.value;
+      return setting.options
+        ? setting.options[setting.value].text
+        : setting.value;
     }
 
     function bySlug() {
-      return getList()
-        .then(getSlugMap)
-        ;
+      return getList().then(getSlugMap);
     }
 
     function getSlugMap() {
@@ -69,10 +74,7 @@
     }
 
     function getFresh() {
-      groupsPromise = $groups
-        .getList()
-        .then(storeGroups)
-        ;
+      groupsPromise = $groups.getList().then(storeGroups);
 
       return groupsPromise;
     }
