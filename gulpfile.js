@@ -1,6 +1,6 @@
 var
   gulp = require('gulp'),
-  $ = require('gulp-load-plugins')(),
+  $ = require('gulp-load-plugins')()
   ;
 
 var isProduction = true;
@@ -17,14 +17,12 @@ var source = {
     paths.scripts + '**/*.module.js',
     paths.scripts + '**/*.js'
   ],
-  templates: paths.scripts + '**/*.pug',
 };
 
 var build = {
   dir: './build',
   src: {
     js: 'src.min.js',
-    tpls: 'templates.js',
   },
   vendor: {
     js: 'vendor.min.js',
@@ -94,25 +92,11 @@ gulp.task('vendor', function () {
     ;
 });
 
-gulp.task('templates', function () {
-  return gulp
-    .src(source.templates)
-    .pipe($.pug(pugOptions))
-    .on('error', handleError)
-    .pipe($.angularTemplatecache(tplCacheOptions))
-    .pipe($.if(isProduction, $.uglify({
-      preserveComments: 'some'
-    })))
-    .pipe(gulp.dest(build.dir))
-    ;
-});
-
 gulp.task('merge', function () {
   return gulp
     .src([
       build.dir +'/'+build.vendor.js,
       build.dir +'/'+build.src.js,
-      build.dir +'/'+build.src.tpls,
     ])
     .pipe($.sourcemaps.init({loadMaps: true}))
     .pipe($.concat(build.dist.js))
@@ -124,7 +108,6 @@ gulp.task('merge', function () {
 gulp.task('default', gulp.series([
   'scripts',
   'vendor',
-  'templates',
   'merge',
 ]));
 
