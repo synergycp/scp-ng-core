@@ -1,10 +1,7 @@
 (function () {
-  'use strict';
+  "use strict";
 
-  angular
-    .module('scp.core.api')
-    .provider('Api', ApiProviderFactory)
-  ;
+  angular.module("scp.core.api").provider("Api", ApiProviderFactory);
 
   /**
    * @ngInject
@@ -12,17 +9,17 @@
   function ApiProviderFactory(RestangularProvider) {
     var ApiProvider = this;
     var typeMap = {
-      'success': 'success',
-      'danger': 'danger',
-      'warning': 'warning',
-      'info': 'info'
+      success: "success",
+      danger: "danger",
+      warning: "warning",
+      info: "info",
     };
-    ApiProvider.options = {
-    };
+    ApiProvider.options = {};
 
     ApiProvider.baseUrl = baseUrl;
     ApiProvider.setUrl = setUrl;
-    ApiProvider.addResponseInterceptor = RestangularProvider.addResponseInterceptor;
+    ApiProvider.addResponseInterceptor =
+      RestangularProvider.addResponseInterceptor;
     ApiProvider.$get = ApiService;
 
     function setUrl(url) {
@@ -55,7 +52,9 @@
           return result;
         }
 
+        result.alertingOnErrors = true;
         result.isWrapped = true;
+        result.withoutAlertingOnErrors = withoutAlertingOnErrors;
         result.getList = wrapList(result.getList);
         result.remove = request(result.remove);
         result.patch = request(result.patch);
@@ -67,21 +66,32 @@
 
         return result;
 
+        function withoutAlertingOnErrors() {
+          result.alertingOnErrors = false;
+          return result;
+        }
+
         function wrap(method) {
           return function () {
-            return wrapRestangular(
-              method.apply(result, arguments)
-            );
+            return wrapRestangular(method.apply(result, arguments));
           };
         }
 
         function request(method) {
           return function () {
-            return method.apply(result, arguments)
+            return method
+              .apply(result, arguments)
               .then(wrapNested)
               .then(displayMessages)
-              ;
+              .catch(handleResponseError);
           };
+        }
+
+        function handleResponseError(response) {
+          if (result.alertingOnErrors) {
+            showMessagesFrom(response);
+          }
+          throw response;
         }
 
         function wrapNested(response) {
@@ -100,11 +110,10 @@
         }
 
         function wrapList(oldMethod) {
-          return function() {
+          return function () {
             return request(oldMethod)
               .apply(null, arguments)
-              .then(setRestangularOnList)
-              ;
+              .then(setRestangularOnList);
 
             function setRestangularOnList(list) {
               _.each(list, wrapRestangular);
@@ -121,28 +130,23 @@
 
       function activate() {
         Restangular.addErrorInterceptor(apiErrorInterceptor);
-        Restangular.addErrorInterceptor(apiErrorTranslator);
         Restangular.addFullRequestInterceptor(apiRequestAddApiKey);
       }
 
       function apiUrl() {
-        return baseUrl()+'/api';
+        return baseUrl() + "/api";
       }
 
       function apiErrorInterceptor(response) {
         switch (response.status) {
-        case 401:
-          sendToLogin();
-          return;
+          case 401:
+            sendToLogin();
+            return;
         }
       }
 
       function sendToLogin() {
-        $injector.get('Auth').logout();
-      }
-
-      function apiErrorTranslator(response, deferred, responseHandler) {
-        Api.showMessagesFrom(response);
+        $injector.get("Auth").logout();
       }
 
       function showMessagesFrom(response) {
@@ -163,8 +167,8 @@
         }
 
         displayMessage({
-          type: 'danger',
-          text: 'Invalid API Response'
+          type: "danger",
+          text: "Invalid API Response",
         });
       }
 
@@ -180,10 +184,20 @@
         Alert[type](message.text);
       }
 
-      function apiRequestAddApiKey(element, operation, what, url, headers, params) {
-        params = _.assign({
-          key: getApiKey(),
-        }, params);
+      function apiRequestAddApiKey(
+        element,
+        operation,
+        what,
+        url,
+        headers,
+        params
+      ) {
+        params = _.assign(
+          {
+            key: getApiKey(),
+          },
+          params
+        );
 
         return {
           params: params,
@@ -198,4 +212,4 @@
       }
     }
   }
-}());
+})();
