@@ -24,7 +24,18 @@
       return GlobalConfig.bySlug()
         .then(getSetting)
         .then(getValue)
-        .catch(function () {
+        .catch(function (response) {
+          if (
+            response.data &&
+            response.data.messages &&
+            response.data.messages.length > 0
+          ) {
+            switch (response.data.messages[0].text) {
+              case "License expired.":
+                return Modal.information("auth.error.license_expired").open()
+                  .result;
+            }
+          }
           var apiDomain = {
             domainUrl: Api.all("").getRestangularUrl(),
           };
