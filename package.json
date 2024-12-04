@@ -31,7 +31,7 @@
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",
     "gulp-sourcemaps": "^2.6.0",
-    "lodash": "^4.15.0",
+    "lodash": "^4.17.21",
     "restangular": "^1.5.2"
   }
 }
