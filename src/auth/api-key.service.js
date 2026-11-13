@@ -139,13 +139,40 @@
         ApiKey.fire('near-expiration', apiKey);
       }
 
+      /**
+       * [BMD-234] Local elapsed time, monotonic where available: an NTP step
+       * or the user changing their clock must not move a renewal that is
+       * already scheduled.
+       *
+       * @return {number} seconds, only meaningful as a difference
+       */
+      function now() {
+        return (window.performance && performance.now)
+          ? performance.now() / 1000
+          : Math.floor(new Date() / 1000);
+      }
+
       function secondsToRenewal() {
-        if (!apiKey || !apiKey.expires_at) {
+        if (!apiKey) {
           return null;
         }
 
-        // TODO: get this value from the API in case the user's clock is wrong.
-        var secondsToExpiration = apiKey.expires_at - Math.floor(new Date()/1000);
+        var secondsToExpiration;
+        if (apiKey.expires_in !== null && apiKey.expires_in !== undefined &&
+          apiKey.expires_anchor !== null && apiKey.expires_anchor !== undefined
+        ) {
+          // [BMD-234] The API told us how long is left; we only measure how
+          // much of it has elapsed here. The browser's idea of the date
+          // never enters the calculation.
+          secondsToExpiration = apiKey.expires_in - (now() - apiKey.expires_anchor);
+        } else if (apiKey.expires_at) {
+          // An older API, or a key read back from storage (see
+          // getApiKeyFromStorage): fall back to comparing clocks.
+          secondsToExpiration = apiKey.expires_at - Math.floor(new Date() / 1000);
+        } else {
+          return null;
+        }
+
         if (secondsToExpiration <= 0) {
           // The user's key has expired, so return them to the login page.
           throw new ExpiredKey();
@@ -165,6 +192,8 @@
           key: key.key,
           owner: key.owner,
           expires_at: key.expires_at ? key.expires_at.unix : null,
+          expires_in: typeof key.expires_in === 'number' ? key.expires_in : null,
+          expires_anchor: now(),
         };
 
         getStorage().set(apiKey);
@@ -185,7 +214,19 @@
       }
 
       function getApiKeyFromStorage() {
-        return getStorage().get() || null;
+        var stored = getStorage().get() || null;
+
+        // [BMD-234] expires_anchor was taken against the previous page's
+        // performance.now() origin, which means nothing here. Drop the pair
+        // so a cold load falls back to expires_at; the next renewal response
+        // re-establishes both. Keeping an absolute anchor instead would put
+        // the browser's clock back in the calculation across page loads.
+        if (stored) {
+          stored.expires_in = null;
+          stored.expires_anchor = null;
+        }
+
+        return stored;
       }
 
       /**
